@@ -24,7 +24,6 @@ RUN apk update \
  && apk upgrade --no-cache \
  && apk --no-cache add \
         qemu-system-aarch64 \
-        # qemu-aarch64 \
         iproute2 net-tools lsof
 
 # Expose port 2222 for SSH
