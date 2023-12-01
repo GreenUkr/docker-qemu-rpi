@@ -1,0 +1,31 @@
+FROM alpine:3.18.4
+
+ARG USER_UID=1000
+ARG GROUP_GID=1000
+ARG UGNAME=nonroot
+
+WORKDIR /data
+
+# Check for the presence of an existing group and user. If either exists, remove them.
+RUN if getent passwd ${USER_UID} >/dev/null; then \
+    deluser $(getent passwd ${USER_UID} | cut -d: -f1); fi
+
+RUN if getent group ${GROUP_GID} >/dev/null; then \
+    delgroup $(getent group ${GROUP_GID} | cut -d: -f1); fi
+
+# Create a new system group and a new system user with the specified UID, GID, and username.
+RUN addgroup --system --gid ${GROUP_GID} ${UGNAME}
+
+RUN adduser --system --disabled-password --home /home/${UGNAME} \
+    --uid ${USER_UID} --ingroup ${UGNAME} ${UGNAME}
+
+RUN apk update \
+ && apk upgrade --no-cache \
+ && apk --no-cache add wget
+
+COPY entrypoint.downloader.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER ${UGNAME}
+
+ENTRYPOINT ["/entrypoint.sh"]
