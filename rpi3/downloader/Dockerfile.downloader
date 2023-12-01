@@ -4,6 +4,11 @@ ARG USER_UID=1000
 ARG GROUP_GID=1000
 ARG UGNAME=nonroot
 
+# Set environment variables
+ENV IMAGE_URL="https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2023-05-03/2023-05-03-raspios-bullseye-arm64-lite.img.xz" \
+    SHA256_URL="${IMAGE_URL}.sha256"
+
+# Set the working directory
 WORKDIR /data
 
 # Check for the presence of an existing group and user. If either exists, remove them.
@@ -19,13 +24,20 @@ RUN addgroup --system --gid ${GROUP_GID} ${UGNAME}
 RUN adduser --system --disabled-password --home /home/${UGNAME} \
     --uid ${USER_UID} --ingroup ${UGNAME} ${UGNAME}
 
+# Install required tools
 RUN apk update \
  && apk upgrade --no-cache \
- && apk --no-cache add wget
-
-COPY entrypoint.downloader.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+ && apk --no-cache add curl
 
 USER ${UGNAME}
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Set the ENTRYPOINT instruction to execute curl at runtime
+ENTRYPOINT [ \
+    "sh", "-c", \
+    "IMAGENAME=$(basename \"$IMAGE_URL\") && \
+    curl -sSL -z \"$IMAGENAME\" \"$IMAGE_URL\" | tee \"$IMAGENAME\" | sha256sum -c <(curl -sSL \"$SHA256_URL\") \
+    && exec \"$@\"", "--" \
+]
+
+# Placeholder CMD during the build
+CMD ["echo", "Placeholder CMD, should be overridden at runtime"]
