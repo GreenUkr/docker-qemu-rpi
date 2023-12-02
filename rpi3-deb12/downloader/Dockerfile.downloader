@@ -4,8 +4,19 @@ ARG USER_UID=1000
 ARG GROUP_GID=1000
 ARG UGNAME=nonroot
 
+# Set environment variables
+# ENV IMAGE_URL=""
+# ENV SHA256_URL="${IMAGE_URL}.sha256"
+
 # Set the working directory
 WORKDIR /data
+
+# Check for the presence of an existing group and user. If either exists, remove them.
+# RUN if getent passwd ${USER_UID} >/dev/null; then \
+#     deluser $(getent passwd ${USER_UID} | cut -d: -f1); fi
+
+# RUN if getent group ${GROUP_GID} >/dev/null; then \
+#     delgroup $(getent group ${GROUP_GID} | cut -d: -f1); fi
 
 # Create a new system group and a new system user with the specified UID, GID, and username.
 RUN addgroup --system --gid ${GROUP_GID} ${UGNAME} && \
