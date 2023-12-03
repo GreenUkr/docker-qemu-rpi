@@ -21,9 +21,9 @@ RUN addgroup --system --gid ${GROUP_GID} ${UG_NAME} && \
 # Install required tools
 RUN apk update \
  && apk upgrade --no-cache \
- && apk --no-cache add curl=8.4.0-r0
+ && apk --no-cache add curl=8.4.0-r0 file=5.45-r0 xz=5.4.3-r0
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY entrypoint.downloader.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER ${UG_NAME}
