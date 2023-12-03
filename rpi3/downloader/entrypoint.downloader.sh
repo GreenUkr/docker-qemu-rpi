@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-OUTPUT_NAME="sd_untouched.img"
+SD_BASE_NAME="sd_untouched.img"
 
 # IMAGE_URL will be get from downloader.env
 # IMAGE_URL="https://example.com/image.img.xz"
@@ -56,7 +56,7 @@ echo "Verifying checksum..."
 sha256sum -c "$SHA256_NAME"
 
 # Decompress the image
-decompress_image "$IMAGE_NAME" "$OUTPUT_NAME"
+decompress_image "$IMAGE_NAME" "$SD_BASE_NAME"
 
 echo "All files downloaded and decompressed successfully!"
 

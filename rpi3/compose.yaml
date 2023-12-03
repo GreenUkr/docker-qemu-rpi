@@ -15,7 +15,7 @@ services:
     command: chown -R ${USER_UID}:${GROUP_GID} /data
 
   downloader:
-    image: greenukr/downloader:0.3.0
+    image: greenukr/downloader:0.3.1
     build:
       context: ./downloader
       dockerfile: Dockerfile.downloader
@@ -35,10 +35,14 @@ services:
         condition: service_completed_successfully
 
   processor:
-    image: greenukr/processor:0.3.0
+    image: greenukr/processor:0.3.1
     build:
       context: ./processor
       dockerfile: Dockerfile.processor
+      args:
+        - DEFAULT_UID=${USER_UID}
+        - DEFAULT_GID=${GROUP_GID}
+        - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
       - data-volume:/data
@@ -51,14 +55,17 @@ services:
         condition: service_completed_successfully
 
   emulator:
-    image: greenukr/emulator:0.3.0
+    image: greenukr/emulator:0.3.1
     cpus: "4"
     mem_reservation: "2048M"
-    mem_limit: "4096M"
+    mem_limit: "3072M"
     build:
       context: ./emulator
       dockerfile: Dockerfile.emulator
-
+      args:
+        - DEFAULT_UID=${USER_UID}
+        - DEFAULT_GID=${GROUP_GID}
+        - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
       - data-volume:/data
