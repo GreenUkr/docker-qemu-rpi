@@ -3,7 +3,9 @@
 set -eo pipefail
 
 OUTPUT_NAME="sd_untouched.img"
-IMAGE_URL="https://example.com/image.img.xz"
+
+# IMAGE_URL will be get from downloader.env
+# IMAGE_URL="https://example.com/image.img.xz"
 SHA256_URL="$IMAGE_URL.sha256"
 
 IMAGE_NAME=$(basename "$IMAGE_URL")
