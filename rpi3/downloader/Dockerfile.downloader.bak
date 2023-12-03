@@ -1,12 +1,8 @@
 FROM alpine:3.18.4
-# ARGs will be get from docker-compose build args
-ARG DEFAULT_UID
-ARG DEFAULT_GID
-ARG DEFAULT_UGNAME
 
-ENV USER_UID=${DEFAULT_UID}
-ENV GROUP_GID=${DEFAULT_GID}
-ENV UGNAME=${DEFAULT_UGNAME}
+ARG USER_UID=1000
+ARG GROUP_GID=1000
+ARG UGNAME=nonroot
 
 # Set the working directory
 WORKDIR /data

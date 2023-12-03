@@ -1,9 +1,9 @@
 #!/bin/sh
 
-set -eo pipefail
+set -exo
 
 OUTPUT_NAME="sd_untouched.img"
-IMAGE_URL="https://example.com/image.img.xz"
+IMAGE_URL="https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2023-05-03/2023-05-03-raspios-bullseye-arm64-lite.img.xz"
 SHA256_URL="$IMAGE_URL.sha256"
 
 IMAGE_NAME=$(basename "$IMAGE_URL")
@@ -12,7 +12,7 @@ SHA256_NAME="$IMAGE_NAME.sha256"
 download_file() {
   local url="$1"
   local name="$2"
-
+  echo "Downloading file: $name"
   curl -z "$name" -o "$name" "$url" \
     || { echo "Error: Failed to download file $name"; exit 1; } \
     | [ -s "$name" ] \
@@ -43,7 +43,7 @@ decompress_image() {
     exit 1
   fi
 
-  echo "Image decompressed successfully: $output_file"
+  echo "Image decompressed successfully to: $output_file"
 }
 
 download_file "$IMAGE_URL" "$IMAGE_NAME"
@@ -57,8 +57,3 @@ sha256sum -c "$SHA256_NAME"
 decompress_image "$IMAGE_NAME" "$OUTPUT_NAME"
 
 echo "All files downloaded and decompressed successfully!"
-
-# Add your custom commands here (if any)
-# ...
-
-exec "$@"
