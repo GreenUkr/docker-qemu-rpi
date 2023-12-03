@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-SD_BASE_NAME="sd_untouched.img"
+SD_BASE_NAME="sd_base.img"
 
 # IMAGE_URL will be get from downloader.env
 # IMAGE_URL="https://example.com/image.img.xz"

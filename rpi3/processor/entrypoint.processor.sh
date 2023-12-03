@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-SD_BASE_NAME="sd_untouched.img"
+SD_BASE_NAME="sd_base.img"
 SD_RAW_NAME="sd.img"
 SD_NAME="sd.qcow2"
 
