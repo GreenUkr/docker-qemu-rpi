@@ -1,10 +1,37 @@
 #!/bin/sh
 
-set -eo pipefail
+# Extracting the file name from the provided URL
+FILE_NAME=$(basename "$IMAGE_URL")
 
-SD_BASE_IMAGE="sd_untouched.img"
-SD_RAW_IMAGE="sd.img"
-SD_IMAGE="sd.qcow2"
+# Check if the compressed file exists
+COMP_FILE="/data/$FILE_NAME"
+UNCOMP_FILE="/data/${FILE_NAME%.*}"
+SD_IMAGE_PATH="/data/sd.img"
+
+
+# Check if the uncompressed file already exists
+if [ -f "$UNCOMP_FILE" ]; then
+  echo "Uncompressed file $UNCOMP_FILE already exists. Skipping decompression."
+else
+  if [ -f "$COMP_FILE" ]; then
+    echo "Start uncompressing $COMP_FILE"
+    # Determine the compression type based on file extension and uncompress accordingly
+    case "$COMP_FILE" in
+      *.xz)
+        xz -d -k "$COMP_FILE" ;;
+      *.gz)
+        gzip -d -k "$COMP_FILE" ;;
+      *)
+        echo "Error: Unsupported compression format."
+        exit 1 ;;
+    esac
+
+    echo "File $COMP_FILE uncompressed to $UNCOMP_FILE."
+  else
+    echo "Error: Compressed file $COMP_FILE not found."
+    exit 1
+  fi
+fi
 
 if [ ! -f "$SD_IMAGE_PATH" ]; then
   cp "$UNCOMP_FILE" "$SD_IMAGE_PATH"

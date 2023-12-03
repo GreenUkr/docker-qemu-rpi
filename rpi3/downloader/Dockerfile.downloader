@@ -8,8 +8,6 @@ ENV USER_UID=${DEFAULT_UID}
 ENV GROUP_GID=${DEFAULT_GID}
 ENV UG_NAME=${DEFAULT_UG_NAME}
 
-# ENV IMAGE_URL
-
 # Set the working directory
 WORKDIR /data
 
