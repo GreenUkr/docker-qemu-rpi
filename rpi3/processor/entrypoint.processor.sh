@@ -1,5 +1,5 @@
 #!/bin/sh
-set -exo
+set -e
 
 SD_BASE_NAME="sd_base.img"
 SD_RAW_NAME="sd.img"
@@ -75,7 +75,7 @@ if [ ! -f "$SD_NAME" ]; then
     exit 1
   fi  
   # Resize the image to next power of two finding the most significant bit (add 2 more to incrise by 4)
-  echo "Resizing $SD_NAME to $SD_SIZE ..."
+  echo "Resizing $SD_NAME to ${SD_SIZE}G ..."
   qemu-img resize "$SD_NAME" -f qcow2 "${SD_SIZE}G"
 else
   echo "Info: SD file $SD_NAME already exists. Skipping processing."

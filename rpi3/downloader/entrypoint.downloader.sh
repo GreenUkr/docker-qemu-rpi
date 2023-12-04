@@ -59,7 +59,4 @@ decompress_image "$IMAGE_NAME" "$SD_BASE_NAME"
 
 echo "All files downloaded and decompressed successfully!"
 
-# Add your custom commands here (if any)
-# ...
-
 exec "$@"

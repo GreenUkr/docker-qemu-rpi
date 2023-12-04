@@ -13,13 +13,18 @@ WORKDIR /data
 
 # Create a new system group and a new system user with the specified UID, GID, and username.
 RUN addgroup --system --gid ${GROUP_GID} ${UG_NAME} && \
-    adduser --system --disabled-password --home /home/${UG_NAME} \
+    adduser --system --disabled-password --no-create-home \
+    # --home /home/${UG_NAME} \
     --uid ${USER_UID} --ingroup ${UG_NAME} ${UG_NAME}
 
 # Install required tools
 RUN apk update \
  && apk upgrade --no-cache \
- && apk --no-cache add curl=8.4.0-r0 file=5.45-r0 xz=5.4.3-r0
+ && apk --no-cache add \
+        curl=8.4.0-r0 \
+        file=5.45-r0 \
+        xz=5.4.3-r0 \
+ && rm -rf /var/cache/apk/*
 
 COPY entrypoint.downloader.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
