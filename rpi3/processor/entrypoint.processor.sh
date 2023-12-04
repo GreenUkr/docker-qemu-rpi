@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e
+set -o errexit
+set -o pipefail
+set -o nounset
 
 SD_BASE_NAME="sd_base.img"
 SD_RAW_NAME="sd.img"

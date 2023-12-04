@@ -79,16 +79,23 @@ services:
     depends_on:
       processor:
         condition: service_completed_successfully
-    entrypoint: qemu-system-aarch64 -name rpi3bp -machine raspi3b -cpu cortex-a72 -nographic -dtb bcm2710-rpi-3-b-plus.dtb -m 1G -smp 4 -kernel kernel8.img -sd sd.img -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
-    # command: ["-machine raspi3b", "-cpu cortex-a72", "-nographic", \
-    #           "-dtb bcm2710-rpi-3-b-plus.dtb", "-m 1G -smp 4", \
-    #           "-kernel kernel8.img", \
-    #           "-sd sd.img", \
-    #           "-append 'rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1'", \
-    #           "-device 'usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01'", \
-    #           "-netdev 'user,id=net0,hostfwd=tcp::2222-:22'"]
+    # entrypoint: >-
+    #   qemu-system-aarch64 
+    #   -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
+    #   -dtb bcm2710-rpi-3-b-plus.dtb -kernel kernel8.img -sd sd.qcow2 
+    #   -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
+    #   -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
+    command: >-
+      -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
+      -dtb ${DTB_FILE} -kernel ${KERNEL_FILE} -sd ${SD_NAME} 
+      -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
+      -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
+    # command: >-
+    #   -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
+    #   -dtb bcm2710-rpi-3-b-plus.dtb -kernel kernel8.img -sd sd.qcow2 
+    #   -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
+    #   -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
     # command: ["-version"]
-    # command: ["-readconfig", "/qemu_raspi3b_config.cfg"]
     restart: "no"
     # restart: always
     # restart: on-failure
