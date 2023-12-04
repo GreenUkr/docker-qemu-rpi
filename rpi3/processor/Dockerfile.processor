@@ -12,18 +12,22 @@ ENV UG_NAME=${DEFAULT_UG_NAME}
 WORKDIR /data
 
 # Create a new system group and a new system user with the specified UID, GID, and username.
-RUN addgroup --system --gid ${GROUP_GID} ${UG_NAME} && \
-    adduser --system --disabled-password --no-create-home \
+RUN <<EOF
+addgroup --system --gid ${GROUP_GID} ${UG_NAME}
+adduser --system --disabled-password --no-create-home \
     --uid ${USER_UID} --ingroup ${UG_NAME} ${UG_NAME}
+EOF
 
 # Install required tools
-RUN apk update \
- && apk upgrade --no-cache \
- && apk --no-cache add \
-        file=5.45-r0 \
-        mtools=4.0.43-r1 \
-        qemu-img=8.0.5-r0 \
- && rm -rf /var/cache/apk/*
+RUN <<EOF 
+apk update
+apk upgrade --no-cache
+apk --no-cache add \
+    file=5.45-r0 \
+    mtools=4.0.43-r1 \
+    qemu-img=8.0.5-r0
+rm -rf /var/cache/apk/*
+EOF
 
 COPY entrypoint.processor.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

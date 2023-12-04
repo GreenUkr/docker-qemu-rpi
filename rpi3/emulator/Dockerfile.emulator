@@ -12,17 +12,21 @@ ENV UG_NAME=${DEFAULT_UG_NAME}
 WORKDIR /data
 
 # Create a new system group and a new system user with the specified UID, GID, and username.
-RUN addgroup --system --gid ${GROUP_GID} ${UG_NAME} && \
-    adduser --system --disabled-password --no-create-home \
+RUN <<EOF
+addgroup --system --gid ${GROUP_GID} ${UG_NAME}
+adduser --system --disabled-password --no-create-home \
     --uid ${USER_UID} --ingroup ${UG_NAME} ${UG_NAME}
+EOF
 
 # Install required tools
-RUN apk update \
- && apk upgrade --no-cache \
- && apk --no-cache add \
-        qemu-system-aarch64 \
-        iproute2 net-tools lsof \
- && rm -rf /var/cache/apk/*
+RUN <<EOF 
+apk update
+apk upgrade --no-cache
+apk --no-cache add \
+    qemu-system-aarch64 \
+    iproute2 net-tools lsof
+rm -rf /var/cache/apk/*
+EOF
 
 # Expose port 2222 for SSH
 EXPOSE 2222
