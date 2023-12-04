@@ -19,13 +19,13 @@ RUN addgroup --system --gid ${GROUP_GID} ${UG_NAME} && \
 # Install required tools
 RUN apk update \
  && apk upgrade --no-cache \
- && apk --no-cache add file=5.45-r0 mtools qemu-img
+ && apk --no-cache add file=5.45-r0 mtools=4.0.43-r1 qemu-img=8.0.5-r0
 
 COPY entrypoint.processor.sh /usr/local/bin/entrypoint.sh
+# COPY entrypoint.test.sh /entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER ${UG_NAME}
-
 # Set the ENTRYPOINT instruction to execute download and unzip at runtime
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

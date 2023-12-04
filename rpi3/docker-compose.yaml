@@ -27,9 +27,8 @@ services:
     volumes:
       - data-volume:/data
     env_file:
-      - .env
-      - .downloader.env
-    # entrypoint: ["/bin/sh", "-c", "sleep infinity"]
+      - ./.env
+      - ./.downloader.env
     depends_on:
       chown:
         condition: service_completed_successfully
@@ -47,9 +46,10 @@ services:
     volumes:
       - data-volume:/data
     env_file:
-      - .env
-      - .downloader.env
-      - .processor.env
+      - ./.env
+      - ./.downloader.env
+      - ./.processor.env
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
     depends_on:
       downloader:
         condition: service_completed_successfully
@@ -72,8 +72,8 @@ services:
     ports:
       - "2222:2222"
     env_file:
-      - .env
-      - .processor.env
+      - ./.env
+      - ./.processor.env
     # security-opt:
     #     - no-new-privileges
     depends_on:

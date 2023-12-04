@@ -1,6 +1,5 @@
 #!/bin/sh
-
-set -eo pipefail
+set -exo
 
 SD_BASE_NAME="sd_base.img"
 SD_RAW_NAME="sd.img"
@@ -35,6 +34,7 @@ check_fat32_partition() {
 }
 
 # Main code
+echo "Starting processor..."
 if [ ! -f "$SD_NAME" ]; then
   # Call the function to check for the FAT32 partition and get the offset
   offset=$(check_fat32_partition 2>/dev/null)

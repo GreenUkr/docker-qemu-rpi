@@ -1,11 +1,10 @@
 #!/bin/sh
 
-set -eo pipefail
+set -e
 
 SD_BASE_NAME="sd_base.img"
 
 # IMAGE_URL will be get from downloader.env
-# IMAGE_URL="https://example.com/image.img.xz"
 SHA256_URL="$IMAGE_URL.sha256"
 
 IMAGE_NAME=$(basename "$IMAGE_URL")
