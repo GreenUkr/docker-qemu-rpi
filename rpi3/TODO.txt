@@ -1,0 +1,2 @@
+Will use sed to change config.txt in raspi image
+to remove BT and WiFi 

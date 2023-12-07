@@ -4,8 +4,9 @@ set -o pipefail
 set -o nounset
 
 SD_BASE_NAME="sd_base.img"
-SD_RAW_NAME="sd.img"
-SD_NAME="sd.qcow2"
+SD_RAW_NAME="sd_raw.img"
+# SD_NAME="sd.qcow2"
+SD_NAME="sd.img"
 
 # Function to check for the FAT32 partition and return the offset
 check_fat32_partition() {
@@ -65,7 +66,8 @@ if [ ! -f "$SD_NAME" ]; then
   fi  
 
   echo "Converting $SD_RAW_NAME to $SD_NAME"
-  qemu-img convert -f raw -O qcow2 $SD_RAW_NAME $SD_NAME
+  # qemu-img convert -p -f raw -O qcow2 $SD_RAW_NAME $SD_NAME
+  cp "$SD_RAW_NAME" "$SD_NAME"
   # Check if the conversion was successful
   if [ $? -eq 0 ]; then
     echo "Conversion successful. Removing source image..."
@@ -78,12 +80,14 @@ if [ ! -f "$SD_NAME" ]; then
   fi  
   # Resize the image to next power of two finding the most significant bit (add 2 more to incrise by 4)
   echo "Resizing $SD_NAME to ${SD_SIZE}G ..."
-  qemu-img resize "$SD_NAME" -f qcow2 "${SD_SIZE}G"
+  # qemu-img resize "$SD_NAME" -f qcow2 "${SD_SIZE}G"
+  qemu-img resize "$SD_NAME" -f raw "${SD_SIZE}G"
 else
   echo "Info: SD file $SD_NAME already exists. Skipping processing."
 fi
 
 echo "Check SD file $SD_NAME info"
 qemu-img info "$SD_NAME"
+# qemu-img check -f qcow2 "$SD_NAME"
 
 exec "$@"
