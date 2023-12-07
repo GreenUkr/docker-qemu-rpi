@@ -16,6 +16,8 @@ services:
     volumes:
       # The volume to chown
       - data-volume:/data
+    env_file:
+      - ./.env
     command: chown -R ${USER_UID}:${GROUP_GID} /data
   # chown:
   #   # We can use any image we want as long as we can chown
@@ -31,13 +33,13 @@ services:
   #   command: chown -R ${USER_UID}:${GROUP_GID} /data
 
   downloader:
-    image: greenukr/downloader:0.4.1
+    image: greenukr/downloader:0.5.0
     build:
       context: ./downloader
       dockerfile: Dockerfile.downloader
       args:
-        - DEFAULT_UID=${USER_UID}
-        - DEFAULT_GID=${GROUP_GID}
+        # - DEFAULT_UID=${USER_UID}
+        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
@@ -46,17 +48,17 @@ services:
       - ./.env
       - ./.downloader.env
     depends_on:
-      chown:
+      updater:
         condition: service_completed_successfully
 
   processor:
-    image: greenukr/processor:0.4.1
+    image: greenukr/processor:0.5.0
     build:
       context: ./processor
       dockerfile: Dockerfile.processor
       args:
-        - DEFAULT_UID=${USER_UID}
-        - DEFAULT_GID=${GROUP_GID}
+        # - DEFAULT_UID=${USER_UID}
+        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
@@ -71,7 +73,7 @@ services:
         condition: service_completed_successfully
 
   emulator:
-    image: greenukr/emulator:0.4.1
+    image: greenukr/emulator:0.5.0
     cpu_count: 4
     mem_reservation: 3072M
     mem_limit: 4096M
@@ -80,8 +82,8 @@ services:
       context: ./emulator
       dockerfile: Dockerfile.emulator
       args:
-        - DEFAULT_UID=${USER_UID}
-        - DEFAULT_GID=${GROUP_GID}
+        # - DEFAULT_UID=${USER_UID}
+        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
