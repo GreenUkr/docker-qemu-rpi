@@ -3,4 +3,7 @@ admin-admin.txt
 **/test/*
 !rpi3/*
 !.gitignore
+test/
+rpi3-deb12/*
+
 

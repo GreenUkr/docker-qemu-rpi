@@ -1,0 +1,37 @@
+FROM alpine:3.18.4
+
+ARG USER_UID=1000
+ARG GROUP_GID=1000
+ARG UGNAME=nonroot
+
+# Set the working directory
+WORKDIR /data
+
+# Create a new system group and a new system user with the specified UID, GID, and username.
+RUN addgroup --system --gid ${GROUP_GID} ${UGNAME} && \
+    adduser --system --disabled-password --home /home/${UGNAME} \
+    --uid ${USER_UID} --ingroup ${UGNAME} ${UGNAME}
+
+# Install required tools
+RUN apk update \
+ && apk upgrade --no-cache \
+ && apk --no-cache add curl=8.4.0-r0
+
+USER ${UGNAME}
+
+# Set the ENTRYPOINT instruction to execute curl at runtime
+ENTRYPOINT [ \
+    "sh", "-c", \
+    "SHA256_URL=${IMAGE_URL}.sha256 \
+    && IMAGENAME=$(basename $IMAGE_URL) \
+    && echo $IMAGENAME \
+    && SHA256=$(basename $SHA256_URL) \
+    && echo $SHA256 \
+    && curl -sSL -# $IMAGE_URL -z $IMAGENAME -o $IMAGENAME \
+    && curl -sSL -# $SHA256_URL -z $SHA256 -o $SHA256 \
+    && sha256sum -c $SHA256 \
+    && exec $@", "--" \
+]
+
+# Placeholder CMD during the build
+CMD ["echo", "Placeholder CMD, should be overridden at runtime"]

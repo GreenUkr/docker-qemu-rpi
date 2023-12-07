@@ -1,0 +1,29 @@
+FROM alpine:3.18.4
+# ARGs will be get from docker-compose build args
+ARG DEFAULT_UID
+ARG DEFAULT_GID
+ARG DEFAULT_UG_NAME
+
+ENV USER_UID=${DEFAULT_UID}
+ENV GROUP_GID=${DEFAULT_GID}
+ENV UG_NAME=${DEFAULT_UG_NAME}
+
+# Set the working directory
+WORKDIR /data
+
+# Create a new system group and a new system user with the specified UID, GID, and username.
+RUN <<EOF
+addgroup --system --gid ${GROUP_GID} ${UG_NAME}
+adduser --system --disabled-password --no-create-home \
+    --uid ${USER_UID} --ingroup ${UG_NAME} ${UG_NAME}
+EOF
+
+# Upgrade to avoid security vulnerabilities.
+RUN <<EOF 
+apk update
+apk upgrade --no-cache
+rm -rf /var/cache/apk/*
+EOF
+
+# Placeholder CMD during the build
+CMD ["/bin/sh", "-c", "ls -la /data"]

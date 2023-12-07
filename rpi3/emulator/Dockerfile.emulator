@@ -1,53 +1,20 @@
-FROM alpine:3.18.4
+FROM greenukr/updater:0.1.0
 
-ARG USER_UID=1000
-ARG GROUP_GID=1000
-ARG UGNAME=nonroot
-
-WORKDIR /data
-
-# Check for the presence of an existing group and user. If either exists, remove them.
-RUN if getent passwd ${USER_UID} >/dev/null; then \
-    deluser $(getent passwd ${USER_UID} | cut -d: -f1); fi
-
-RUN if getent group ${GROUP_GID} >/dev/null; then \
-    delgroup $(getent group ${GROUP_GID} | cut -d: -f1); fi
-
-# Create a new system group and a new system user with the specified UID, GID, and username.
-RUN addgroup --system --gid ${GROUP_GID} ${UGNAME}
-
-RUN adduser --system --disabled-password --home /home/${UGNAME} \
-    --uid ${USER_UID} --ingroup ${UGNAME} ${UGNAME}
-
-# Update the image to the latest packages
-RUN apk update \
- && apk upgrade --no-cache \
- && apk --no-cache add \
-        qemu-system-aarch64 \
-        iproute2 net-tools lsof
+# Install required tools
+RUN <<EOF 
+apk update
+apk --no-cache add \
+    qemu-system-aarch64 \
+    iproute2 net-tools lsof \
+    openssh-client busybox-extras qemu-img
+rm -rf /var/cache/apk/*
+EOF
 
 # Expose port 2222 for SSH
 EXPOSE 2222
 
-USER ${UGNAME}
-# COPY qemu_raspi3b_config.cfg /qemu_raspi3b_config.cfg
-
-# COPY entrypoint.emulator.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
-
-# ENTRYPOINT ["/entrypoint.sh"]
-
-# # Start qemu with SSH port forwarding
-# # All env vars in file ../emulator.env
-# ENTRYPOINT qemu-aarch64 -name rpi3bp -machine raspi3b -cpu cortex-a72 -nographic \
-#     -dtb "$DTB_FILE" -m 1G -smp 4 \
-#     -kernel "$KERNEL_FILE" -sd "$SD_IMAGE_FILE" \
-#     -append "$APPEND" \
-#     -device "$DEVICE" \
-#     -netdev "$NETDEV"
+USER ${UG_NAME}
 
 ENTRYPOINT ["qemu-system-aarch64"]
-CMD ["-h"]
 
-# ENTRYPOINT ["/bin/bash", "-c", \
-#     "qemu-system-aarch64 -machine raspi3b -cpu cortex-a53 -nographic -dtb ${DTB_FILE} -m 1G -smp 4 -kernel ${KERNEL_FILE} -sd ${IMAGE_FILE} -append 'rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1' -device usb-net,netdev=net0 -netdev user,id=net0,hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:80"]
+CMD ["-h"]

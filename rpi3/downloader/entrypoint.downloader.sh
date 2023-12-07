@@ -1,63 +1,63 @@
 #!/bin/sh
+set -o errexit
+set -o pipefail
+set -o nounset
+
+SD_BASE_NAME="sd_base.img"
+
+# IMAGE_URL will be get from downloader.env
+SHA256_URL="$IMAGE_URL.sha256"
+
+IMAGE_NAME=$(basename "$IMAGE_URL")
+SHA256_NAME="$IMAGE_NAME.sha256"
 
 download_file() {
-  local url=$1
-  local output_path=$2
-  local wget_options=" --progress=dot:giga --no-check-certificate"
+  local url="$1"
+  local name="$2"
 
-  if [ -f "$output_path" ]; then
-    echo "File $(basename "$output_path") already exists. Skipping download."
-  else
-    if wget $wget_options -O "$output_path" "$url"; then
-      echo "$output_path downloaded successfully."
-    else
-      echo "Error: Failed to download $output_path."
-      exit 1
-    fi
-  fi
+  curl -z "$name" -o "$name" "$url" \
+    || { echo "Error: Failed to download file $name"; exit 1; } \
+    | [ -s "$name" ] \
+      || { echo "Error: Downloaded file $name is empty"; exit 1; }
+
+  echo "File downloaded successfully: $name"
 }
 
-verify_checksum() {
-  local file_path=$1
-  local checksum_file=$2
+decompress_image() {
+  local input_file="$1"
+  local output_file="$2"
 
-  sha256sum -c "$checksum_file" >/dev/null 2>&1
-  SHA256_STATUS=$?
-  if [ $SHA256_STATUS -ne 0 ]; then
-    echo "Error: SHA256 checksum verification failed for $file_path."
-    return 1
-  else
-    echo "SHA256 checksum verified for $file_path."
+  if [ -s "$output_file" ]; then
+    echo "Skipping decompression. Output file already exists and is non-zero: $output_file"
     return 0
   fi
+
+  if file "$input_file" | grep -qi "xz compressed data"; then
+    # Decompress XZ-compressed image
+    echo "Decompressing XZ-compressed image: $input_file"
+    xz -dk "$input_file" -c > "$output_file"
+  elif file "$input_file" | grep -qi "gzip compressed data"; then
+    # Decompress GZIP-compressed image
+    echo "Decompressing GZIP-compressed image: $input_file"
+    gzip -dk "$input_file" -c > "$output_file"
+  else
+    echo "Error: Unsupported compression type for image: $input_file"
+    exit 1
+  fi
+
+  echo "Image decompressed successfully: $output_file"
 }
 
-# Extracting the file name from the provided URL
-FILE_NAME=$(basename "$IMAGE_URL")
+download_file "$IMAGE_URL" "$IMAGE_NAME"
+download_file "$SHA256_URL" "$SHA256_NAME"
 
-# Setting the local file paths for the image and SHA256 file
-LOCAL_FILE_PATH="/data/$FILE_NAME"
-SHA256_FILE_PATH="$LOCAL_FILE_PATH.sha256"
+# Verify the SHA256 checksum
+echo "Verifying checksum..."
+sha256sum -c "$SHA256_NAME"
 
-# Download the image file
-download_file "$IMAGE_URL" "$LOCAL_FILE_PATH"
+# Decompress the image
+decompress_image "$IMAGE_NAME" "$SD_BASE_NAME"
 
-# Download the SHA256 file
-download_file "$IMAGE_URL.sha256" "$SHA256_FILE_PATH"
+echo "All files downloaded and decompressed successfully!"
 
-# Verify checksum of the image file
-if verify_checksum "$LOCAL_FILE_PATH" "$SHA256_FILE_PATH"; then
-  # If verification is successful, continue
-  echo "Checksum verification successful."
-else
-  # If verification fails, redownload the image file
-  echo "SHA256 checksum verification failed. Redownloading the file."
-  rm -f "$LOCAL_FILE_PATH"
-  download_file "$IMAGE_URL" "$LOCAL_FILE_PATH"
-
-  # Verify checksum of the redownloaded image file
-  verify_checksum "$LOCAL_FILE_PATH" "$SHA256_FILE_PATH"
-fi
-
-# Execute the provided command or entrypoint
 exec "$@"
