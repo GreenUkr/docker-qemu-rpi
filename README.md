@@ -1,43 +1,28 @@
 # docker-qemu-rpi
-# Docker Compose Setup for Multi-Service setup RaspberryPi OS in QEMU emulator inside docker
 
-This repository contains the Docker Compose configuration for a multi-service application using several custom Docker images.
+## Emulate RaspberryPi OS in QEMU inside docker container
+This repository contains the Docker Compose configuration for a multi-service build several custom Docker images and run RaspberryPi OS as a QEMU VM inside docker container.
+You may access running container via SSH to localhost on port 2222.
 
-## Services
+### Requirements
+Host with docker and docker compose installed (possible to run under Docker Desktop in windows) to build and run containts. SSH client to get inside emulated rpi.
 
-### 1. Updater Service
+### Default Credentials
+Default Credentials: ***admin:admin***  
 
-- **Image:** greenukr/updater:0.1.0
-- **Purpose:** Build an updated Alpine image with a non-root user and chown the specified volume.
-- **Command:** `chown -R ${USER_UID}:${GROUP_GID} /data`
-- **Environment Variables:** Loaded from `.env` file.
+### Port 2222
+The default port 2222 on localhost to access VM.
 
-### 2. Downloader Service
+### Getting started with building your images
+Getting started is as simple as cloning this repository on your machine. You can do so with:
+```bash
+git clone https://github.com/GreenUkr/docker-qemu-rpi.git
+```
+After cloning the repository, you can move to the next step and start configuration. All the necessary files are located in the [rpi3](./rpi3) directory, so don't forget to change the directory:
+```bash
+cd rpi3
+```
+For more detailed instructions, please refer to the [rpi3/README.md](./rpi3/README.md) file.
 
-- **Image:** greenukr/downloader:0.5.0
-- **Purpose:** Download data to the specified volume.
-- **Environment Variables:** Loaded from `.env` and `.downloader.env` files.
-- **Depends On:** updater (condition: service_completed_successfully)
-
-### 3. Processor Service
-
-- **Image:** greenukr/processor:0.5.0
-- **Purpose:** Process data from the specified volume.
-- **Environment Variables:** Loaded from `.env`, `.downloader.env`, and `.processor.env` files.
-- **Depends On:** downloader (condition: service_completed_successfully)
-
-### 4. Emulator Service
-
-- **Image:** greenukr/emulator:0.5.0
-- **Purpose:** Run an emulator with specified configurations.
-- **Environment Variables:** Loaded from `.env` and `.processor.env` files.
-- **Ports:** 2222:2222
-- **Depends On:** processor (condition: service_completed_successfully)
-- **Command:**
-  ```bash
-  -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic
-  -dtb ${DTB_FILE} -kernel ${KERNEL_FILE} -sd ${SD_NAME}
-  -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1"
-  -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
-  -monitor telnet:127.0.0.1:5555,server,nowait
-  -monitor unix:qemu-monitor-socket,server,nowait
+### Regarding Qcow2 image building
+Unfortunately, all my attempts to start the VM with an image converted to qcow2 have failed. The VM fails to start after the filesystem grows to the full size of the SD image. If you have insights or solutions to this issue, please feel free to contribute or share your findings.
