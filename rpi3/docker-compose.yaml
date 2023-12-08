@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # build updated Alpine image with nonroot user and chown volume
+  # Build an updated Alpine image with a non-root user and chown the specified volume.
   updater:
     image: greenukr/updater:0.1.0
     build:
@@ -19,27 +19,14 @@ services:
     env_file:
       - ./.env
     command: chown -R ${USER_UID}:${GROUP_GID} /data
-  # chown:
-  #   # We can use any image we want as long as we can chown
-  #   image: alpine:3.18.4
-  #   # Need a user priviliged enough to chown
-  #   user: "root"
-  #   # Specify the group in question
-  #   group_add:
-  #     - ${GROUP_GID}
-  #   volumes:
-  #     # The volume to chown
-  #     - data-volume:/data
-  #   command: chown -R ${USER_UID}:${GROUP_GID} /data
 
+  # Download data to the specified volume.
   downloader:
     image: greenukr/downloader:0.5.0
     build:
       context: ./downloader
       dockerfile: Dockerfile.downloader
       args:
-        # - DEFAULT_UID=${USER_UID}
-        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
@@ -51,14 +38,13 @@ services:
       updater:
         condition: service_completed_successfully
 
+  # Process some porations on data from the specified volume.
   processor:
     image: greenukr/processor:0.5.0
     build:
       context: ./processor
       dockerfile: Dockerfile.processor
       args:
-        # - DEFAULT_UID=${USER_UID}
-        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
@@ -72,6 +58,7 @@ services:
       downloader:
         condition: service_completed_successfully
 
+  # Run QEMU emulator with specified configurations.
   emulator:
     image: greenukr/emulator:0.5.0
     cpu_count: 4
@@ -82,8 +69,6 @@ services:
       context: ./emulator
       dockerfile: Dockerfile.emulator
       args:
-        # - DEFAULT_UID=${USER_UID}
-        # - DEFAULT_GID=${GROUP_GID}
         - DEFAULT_UG_NAME=${UG_NAME}
     working_dir: /data
     volumes:
@@ -108,14 +93,18 @@ services:
       -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
       -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
       -monitor telnet:127.0.0.1:5555,server,nowait
-      -monitor unix:qemu-monitor-socket,server,nowait
+    # command: >-
+    #   -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
+    #   -dtb ${DTB_FILE} -kernel ${KERNEL_FILE} -sd ${SD_NAME} 
+    #   -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
+    #   -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
+    #   -monitor unix:qemu-monitor-socket,server,nowait
 
     # '-monitor telnet:127.0.0.1:5555,server,nowait' will enable telnet server for monitoring
     # Use: 'busybox-extras telnet 127.0.0.1 5555' to connect to qemu in container
     #       'echo system_powerdown |busybox-extras telnet 127.0.0.1 5555
     # '-monitor unix:qemu-monitor-socket,server,nowait' will enable unix socket server for monitoring 
     # Use: echo "info status" | socat - unix-connect:qemu-monitor-socket
-    # command: ["-version"]
     restart: unless-stopped
 
 volumes:

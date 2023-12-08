@@ -9,7 +9,8 @@
 	},
 	"extensions": {
 		"recommendations": [
-			"ms-vscode-remote.remote-ssh-edit"
+			"ms-vscode-remote.remote-ssh-edit",
+			"github.vscode-pull-request-github"
 		]
 	}
 }
