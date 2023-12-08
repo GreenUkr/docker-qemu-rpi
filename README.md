@@ -4,11 +4,11 @@
 This repository contains the Docker Compose configuration for a multi-service build several custom Docker images and run RaspberryPi OS as a QEMU VM inside docker container.
 You may access running container via SSH to localhost on port 2222.
 
-### Default Credentials
-Default Credentials: ***admin:admin***  
-
 ### Requirements
 Host with docker and docker compose installed (possible to run under Docker Desktop in windows) to build and run containts. SSH client to get inside emulated rpi.
+
+### Default Credentials
+Default Credentials: ***admin:admin***  
 
 ### Port 2222
 The default port 2222 on localhost to access VM.
