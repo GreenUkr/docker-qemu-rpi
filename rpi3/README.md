@@ -17,7 +17,6 @@ Dockerfiles and entrypoint.sh located in directories named correspondingly.
 │   .processor.env
 │   docker-compose.yaml
 │   README.md
-│   TODO.txt
 │
 ├───downloader
 │       Dockerfile.downloader
