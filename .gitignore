@@ -4,5 +4,5 @@ admin-admin.txt
 !rpi3/*
 !.gitignore
 rpi3-deb12/*
-
-
+**/temp/*
+.bak
