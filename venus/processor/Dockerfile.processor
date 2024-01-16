@@ -1,0 +1,21 @@
+FROM greenukr/updater:0.1.0
+
+# Install required tools
+RUN <<EOF 
+apk update
+apk --no-cache add \
+    file=5.45-r0 \
+    mtools=4.0.43-r1 \
+    qemu-img=8.0.5-r0
+rm -rf /var/cache/apk/*
+EOF
+
+COPY entrypoint.processor.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER ${UG_NAME}
+# Set the ENTRYPOINT instruction to execute download and unzip at runtime
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Placeholder CMD during the build
+CMD ["/bin/sh", "-c", "ls -la /data"]

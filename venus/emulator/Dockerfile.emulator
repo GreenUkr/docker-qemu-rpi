@@ -1,0 +1,21 @@
+FROM greenukr/updater:0.1.0
+
+# Install required tools
+RUN <<EOF 
+apk update
+apk --no-cache add \
+    qemu-system-arm \
+    iproute2 net-tools lsof \
+    openssh-client busybox-extras qemu-img
+rm -rf /var/cache/apk/*
+EOF
+
+# Expose port 2222 for SSH
+EXPOSE 2222 8080
+
+USER ${UG_NAME}
+
+# ENTRYPOINT ["qemu-system-aarch64"]
+ENTRYPOINT ["qemu-system-arm"]
+
+CMD ["-h"]

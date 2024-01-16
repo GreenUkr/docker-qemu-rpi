@@ -1,0 +1,22 @@
+FROM greenukr/updater:0.1.0
+
+# Install required tools
+RUN <<EOF 
+apk update
+apk --no-cache add \
+    curl=8.4.0-r0 \
+    file=5.45-r0 \
+    xz=5.4.3-r0
+rm -rf /var/cache/apk/*
+EOF
+
+COPY entrypoint.downloader.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER ${UG_NAME}
+
+# Set the ENTRYPOINT instruction to execute download and unzip at runtime
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Placeholder CMD during the build
+CMD ["/bin/sh", "-c", "ls -la /data"]
