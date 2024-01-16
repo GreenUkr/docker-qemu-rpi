@@ -91,7 +91,7 @@ services:
       -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
       -dtb ${DTB_FILE} -kernel ${KERNEL_FILE} -sd ${SD_NAME} 
       -append "rw earlyprintk loglevel=8 console=ttyAMA0,115200 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p2 rootdelay=1" 
-      -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22
+      -device usb-net,netdev=net0,mac=02:ca:fe:f0:0d:01 -netdev user,id=net0,hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:80
       -monitor telnet:127.0.0.1:5555,server,nowait
     # command: >-
     #   -name rpi3bp -machine raspi3b -cpu cortex-a72 -m 1G -smp 4 -nographic 
