@@ -4,8 +4,8 @@ FROM greenukr/updater:0.1.0
 RUN <<EOF 
 apk update
 apk --no-cache add \
+    qemu-system-aarch64=8.0.5-r0 \
     # qemu-system-arm \
-    qemu-system-arm \
     iproute2 net-tools lsof \
     openssh-client busybox-extras qemu-img
 rm -rf /var/cache/apk/*
@@ -16,7 +16,7 @@ EXPOSE 2222 8080
 
 USER ${UG_NAME}
 
-# ENTRYPOINT ["qemu-system-aarch64"]
-ENTRYPOINT ["qemu-system-arm"]
+ENTRYPOINT ["qemu-system-aarch64"]
+# ENTRYPOINT ["/usr/bin/qemu-system-arm"]
 
 CMD ["-h"]

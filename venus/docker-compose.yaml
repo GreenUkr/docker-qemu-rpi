@@ -22,7 +22,7 @@ services:
 
   # Download data to the specified volume.
   downloader:
-    image: greenukr/downloader:0.5.0
+    image: greenukr/downloader:0.6.0
     build:
       context: ./downloader
       dockerfile: Dockerfile.downloader
@@ -60,7 +60,7 @@ services:
 
   # Run QEMU emulator with specified configurations.
   emulator:
-    image: greenukr/emulator:0.5.0
+    image: greenukr/emulator:0.6.0
     cpu_count: 4
     mem_reservation: 3072M
     mem_limit: 4096M

@@ -11,16 +11,61 @@ SHA256_URL="$IMAGE_URL.sha256"
 IMAGE_NAME=$(basename "$IMAGE_URL")
 SHA256_NAME="$IMAGE_NAME.sha256"
 
+# download_file() {
+#   local url="$1"
+#   local name="$2"
+
+#   curl -z "$name" -o "$name" "$url" \
+#     || { echo "Error: Failed to download file $name"; exit 1; } \
+#     | [ -s "$name" ] \
+#       || { echo "Error: Downloaded file $name is empty"; exit 1; }
+
+#   echo "File downloaded successfully: $name"
+# }
+
 download_file() {
   local url="$1"
   local name="$2"
 
-  curl -z "$name" -o "$name" "$url" \
-    || { echo "Error: Failed to download file $name"; exit 1; } \
-    | [ -s "$name" ] \
-      || { echo "Error: Downloaded file $name is empty"; exit 1; }
+  if [ ! -e "$name" ]; then
+    status=$(curl -w '%{http_code}' -o "$name" "$url" -s -S)
+    if [ $status -eq 200 ]; then
+      echo "File downloaded successfully."
+      return 0
+    elif [ $status -eq 304 ]; then
+      echo "File not modified. Status code: $status"
+      return 0
+    else
+      echo "File not found. Status code: $status"
+      rm "$name"
+      return 1
+    fi
+  else
+    status=$(curl -w '%{http_code}' -z "$name" -o "$name" "$url" -s -S)
+    if [ $status -eq 200 ]; then
+      echo "File downloaded successfully."
+      return 0
+    elif [ $status -eq 304 ]; then
+      echo "File not modified. Status code: $status"
+      return 0
+    else
+      echo "File not found. Status code: $status"
+      rm "$name"
+      return 1
+    fi
+  fi
 
-  echo "File downloaded successfully: $name"
+
+  # curl -z "$name" -o "$name" "$url" \
+  #   || { echo "Error: Failed to download file $name"; return 1; }
+
+  # if [ -s "$name" ]; then
+  #   echo "File downloaded successfully: $name"
+  #   return 0
+  # else
+  #   echo "Warning: Downloaded file $name is empty"
+  #   return 1
+  # fi
 }
 
 decompress_image() {
@@ -49,11 +94,23 @@ decompress_image() {
 }
 
 download_file "$IMAGE_URL" "$IMAGE_NAME"
-download_file "$SHA256_URL" "$SHA256_NAME"
+# download_file "$SHA256_URL" "$SHA256_NAME"
 
-# Verify the SHA256 checksum
-echo "Verifying checksum..."
-sha256sum -c "$SHA256_NAME"
+download_file "$SHA256_URL" "$SHA256_NAME" || echo "Warning: SHA256 file not found or empty. Skipping checksum verification."
+
+# Check if the SHA256 file exists before attempting verification
+if [ -e "$SHA256_NAME" ]; then
+  # Verify the SHA256 checksum
+  echo "Verifying checksum..."
+  sha256sum -c "$SHA256_NAME" || { echo "Error: SHA256 verification failed."; exit 1; }
+else
+  echo "Warning: SHA256 file not found. Skipping checksum verification."
+fi
+
+
+# # Verify the SHA256 checksum
+# echo "Verifying checksum..."
+# sha256sum -c "$SHA256_NAME"
 
 # Decompress the image
 decompress_image "$IMAGE_NAME" "$SD_BASE_NAME"
